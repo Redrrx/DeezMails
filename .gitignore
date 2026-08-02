@@ -1,0 +1,6 @@
+node_modules/
+dist/
+deezmails.db
+deezmails.db-*
+deezmails.exe
+.env
