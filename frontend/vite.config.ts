@@ -1,9 +1,48 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
+import { readFileSync } from "node:fs";
+import { createRequire } from "node:module";
+
+const require = createRequire(import.meta.url);
 
 export default defineConfig(({ mode }) => ({
   base: mode === "demo" ? "./" : "/",
-  plugins: [react()],
+  plugins: [
+    react(),
+    ...(mode === "demo"
+      ? [
+          {
+            name: "demo-api-docs",
+            apply: "build" as const,
+            generateBundle() {
+              this.emitFile({
+                type: "asset",
+                fileName: "swagger/index.html",
+                source: readFileSync(
+                  new URL("./demo-api-docs.html", import.meta.url),
+                ),
+              });
+              this.emitFile({
+                type: "asset",
+                fileName: "swagger/doc.json",
+                source: readFileSync(
+                  new URL("../backend/docs/swagger.json", import.meta.url),
+                ),
+              });
+              for (const name of ["swagger-ui.css", "swagger-ui-bundle.js"]) {
+                this.emitFile({
+                  type: "asset",
+                  fileName: `swagger/${name}`,
+                  source: readFileSync(
+                    require.resolve(`swagger-ui-dist/${name}`),
+                  ),
+                });
+              }
+            },
+          },
+        ]
+      : []),
+  ],
   build: {
     outDir: mode === "demo" ? "dist-demo" : "dist",
     rollupOptions: {

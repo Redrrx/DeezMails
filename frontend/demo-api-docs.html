@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>DeezMails API docs</title>
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg" />
+    <link rel="stylesheet" href="./swagger-ui.css" />
+  </head>
+  <body>
+    <p>
+      <a href="../">Back to demo</a> ·
+      <a href="./doc.json">Download API specification</a>
+    </p>
+    <p>
+      This demo shows the API documentation. Run DeezMails locally to make API
+      requests.
+    </p>
+    <div id="swagger-ui"></div>
+    <script src="./swagger-ui-bundle.js"></script>
+    <script>
+      SwaggerUIBundle({
+        url: "./doc.json",
+        dom_id: "#swagger-ui",
+        deepLinking: true,
+        supportedSubmitMethods: [],
+        validatorUrl: null,
+      });
+    </script>
+  </body>
+</html>

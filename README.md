@@ -29,6 +29,12 @@ If you need browser authorization or reconnection, DeezMails' callback must matc
 
 If you use your own OAuth app, register your DeezMails callback with Gmail or Microsoft. Set `GMAIL_CLIENT_SECRET` or `MICROSOFT_CLIENT_SECRET` if the app requires a client secret.
 
+## API
+
+DeezMails includes an HTTP API for accounts, proxies, mail, folders, and sync jobs. Open **API docs** in the app header, or use [local Swagger docs](http://localhost:8080/swagger/index.html). Authenticate API requests with `Authorization: Bearer <DEEZMAILS_ACCESS_TOKEN>`.
+
+The [demo API docs](https://redrrx.github.io/DeezMails/swagger/index.html) show the same specification; API requests require a running DeezMails backend.
+
 ## Configuration
 
 Generate an encryption key and an access token:

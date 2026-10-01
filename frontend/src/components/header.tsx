@@ -43,18 +43,20 @@ export function Header({
               {label}
             </Button>
           ))}
-          {mode === "production" && (
-            <Button
-              appearance="subtle"
-              icon={<BookOpenRegular />}
-              as="a"
-              href="/swagger/index.html"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              API docs
-            </Button>
-          )}
+          <Button
+            appearance="subtle"
+            icon={<BookOpenRegular />}
+            as="a"
+            href={
+              mode === "demo"
+                ? `${import.meta.env.BASE_URL}swagger/index.html`
+                : "/swagger/index.html"
+            }
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            API docs
+          </Button>
           <Button
             appearance={view === "settings" ? "primary" : "subtle"}
             icon={<SettingsRegular />}
