@@ -1,0 +1,11 @@
+*
+!backend/
+!backend/**
+!frontend/
+!frontend/**
+**/node_modules
+frontend/dist*
+**/.env*
+!frontend/.env.demo
+**/*.db*
+backend/deezmails

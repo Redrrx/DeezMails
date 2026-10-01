@@ -1,0 +1,36 @@
+{
+  "name": "deezmails-ui",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "engines": {
+    "bun": ">=1.4.2"
+  },
+  "scripts": {
+    "demo": "bunx --bun vite --mode demo",
+    "build:demo": "bunx --bun tsc -b && bunx --bun vite build --mode demo",
+    "preview:demo": "bunx --bun vite preview --mode demo --host 127.0.0.1",
+    "dev": "bunx --bun vite",
+    "build": "bunx --bun tsc -b && bunx --bun vite build"
+  },
+  "dependencies": {
+    "@fluentui/react-components": "^9.74.4",
+    "@fluentui/react-icons": "^2.0.334",
+    "@hookform/resolvers": "^5.1.1",
+    "@tanstack/react-query": "^5.85.5",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "react-hook-form": "^7.62.0",
+    "zod": "^4.1.5",
+    "zustand": "^5.0.8"
+  },
+  "devDependencies": {
+    "@types/react": "^19.1.10",
+    "@types/react-dom": "^19.1.7",
+    "@vitejs/plugin-react": "^5.0.2",
+    "prettier": "^3.9.6",
+    "typescript": "^5.9.2",
+    "vite": "^7.1.3"
+  },
+  "packageManager": "bun@1.4.2"
+}

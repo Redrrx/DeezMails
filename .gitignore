@@ -1,0 +1,12 @@
+frontend/node_modules/
+frontend/dist/
+frontend/dist-demo/
+deezmails.db
+deezmails.db-*
+.deezmails-production.key
+.deezmails-production.token
+backend/deezmails
+/deezmails
+deezmails.exe
+.env
+backend/.env

@@ -1,0 +1,840 @@
+basePath: /
+definitions:
+  models.Account:
+    properties:
+      clientId:
+        type: string
+      createdAt:
+        type: string
+      email:
+        type: string
+      enabled:
+        type: boolean
+      folder:
+        type: string
+      id:
+        type: integer
+      incomingHost:
+        type: string
+      incomingPort:
+        type: integer
+      lastCheckedAt:
+        type: string
+      lastError:
+        type: string
+      lastErrorAction:
+        $ref: '#/definitions/models.MailErrorAction'
+      lastErrorCode:
+        $ref: '#/definitions/models.MailErrorCode'
+      lastSyncedAt:
+        type: string
+      nextSyncAt:
+        type: string
+      provider:
+        type: string
+      proxy:
+        $ref: '#/definitions/models.Proxy'
+      proxyId:
+        type: integer
+      status:
+        type: string
+      syncEnabled:
+        type: boolean
+      tlsMode:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  models.AccountInput:
+    properties:
+      clientId:
+        type: string
+      email:
+        type: string
+      folder:
+        type: string
+      incomingHost:
+        type: string
+      incomingPort:
+        type: integer
+      password:
+        type: string
+      provider:
+        type: string
+      proxyId:
+        type: integer
+      refreshToken:
+        type: string
+      tlsMode:
+        type: string
+    type: object
+  models.AccountUpdateInput:
+    properties:
+      clientId:
+        type: string
+      email:
+        type: string
+      enabled:
+        type: boolean
+      folder:
+        type: string
+      incomingHost:
+        type: string
+      incomingPort:
+        type: integer
+      password:
+        type: string
+      provider:
+        type: string
+      proxyId:
+        type: integer
+      refreshToken:
+        type: string
+      syncEnabled:
+        type: boolean
+      tlsMode:
+        type: string
+    type: object
+  models.Email:
+    properties:
+      accountId:
+        type: integer
+      body:
+        type: string
+      bodyTruncated:
+        type: boolean
+      createdAt:
+        type: string
+      folder:
+        type: string
+      from:
+        type: string
+      id:
+        type: integer
+      isRead:
+        type: boolean
+      preview:
+        type: string
+      receivedAt:
+        type: string
+      remoteId:
+        type: string
+      subject:
+        type: string
+      threadId:
+        type: string
+      to:
+        type: string
+    type: object
+  models.ErrorResponse:
+    properties:
+      action:
+        $ref: '#/definitions/models.MailErrorAction'
+      code:
+        $ref: '#/definitions/models.MailErrorCode'
+      error:
+        type: string
+      retryAfterSeconds:
+        type: integer
+    type: object
+  models.Folder:
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+    type: object
+  models.JobRun:
+    properties:
+      account:
+        $ref: '#/definitions/models.Account'
+      accountId:
+        type: integer
+      attempts:
+        type: integer
+      created:
+        type: integer
+      createdAt:
+        type: string
+      endedAt:
+        type: string
+      error:
+        type: string
+      errorAction:
+        $ref: '#/definitions/models.MailErrorAction'
+      errorCode:
+        $ref: '#/definitions/models.MailErrorCode'
+      fetched:
+        type: integer
+      folder:
+        type: string
+      id:
+        type: integer
+      logs:
+        type: string
+      nextAttemptAt:
+        type: string
+      queueId:
+        type: string
+      startedAt:
+        type: string
+      status:
+        $ref: '#/definitions/models.JobStatus'
+      synced:
+        type: integer
+      type:
+        $ref: '#/definitions/models.JobType'
+      updated:
+        type: integer
+      updatedAt:
+        type: string
+    type: object
+  models.JobStatus:
+    enum:
+    - queued
+    - running
+    - retrying
+    - succeeded
+    - failed
+    type: string
+    x-enum-varnames:
+    - JobStatusQueued
+    - JobStatusRunning
+    - JobStatusRetrying
+    - JobStatusSucceeded
+    - JobStatusFailed
+  models.JobSummary:
+    properties:
+      accountEmail:
+        type: string
+      accountId:
+        type: integer
+      attempts:
+        type: integer
+      created:
+        type: integer
+      createdAt:
+        type: string
+      endedAt:
+        type: string
+      error:
+        type: string
+      errorAction:
+        $ref: '#/definitions/models.MailErrorAction'
+      errorCode:
+        $ref: '#/definitions/models.MailErrorCode'
+      fetched:
+        type: integer
+      id:
+        type: integer
+      nextAttemptAt:
+        type: string
+      startedAt:
+        type: string
+      status:
+        $ref: '#/definitions/models.JobStatus'
+      synced:
+        type: integer
+      type:
+        $ref: '#/definitions/models.JobType'
+      updated:
+        type: integer
+      updatedAt:
+        type: string
+    type: object
+  models.JobType:
+    enum:
+    - sync_account
+    - verify_connection
+    type: string
+    x-enum-varnames:
+    - JobTypeSyncAccount
+    - JobTypeVerifyConnection
+  models.MailErrorAction:
+    enum:
+    - none
+    - retry
+    - reconnect
+    - edit_account
+    - contact_admin
+    type: string
+    x-enum-varnames:
+    - MailErrorActionNone
+    - MailErrorActionRetry
+    - MailErrorActionReconnect
+    - MailErrorActionEditAccount
+    - MailErrorActionContactAdmin
+  models.MailErrorCode:
+    enum:
+    - authentication_failed
+    - permission_denied
+    - organization_policy
+    - quota_exceeded
+    - rate_limited
+    - provider_unavailable
+    - not_found
+    - invalid_configuration
+    - tls_failed
+    - network_failed
+    - protocol_failed
+    - response_too_large
+    - cancelled
+    - internal_error
+    type: string
+    x-enum-varnames:
+    - MailErrorAuthentication
+    - MailErrorPermission
+    - MailErrorPolicy
+    - MailErrorQuota
+    - MailErrorRateLimit
+    - MailErrorUnavailable
+    - MailErrorNotFound
+    - MailErrorConfiguration
+    - MailErrorTLS
+    - MailErrorNetwork
+    - MailErrorProtocol
+    - MailErrorResponseTooLarge
+    - MailErrorCancelled
+    - MailErrorInternal
+  models.Proxy:
+    properties:
+      createdAt:
+        type: string
+      host:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      port:
+        type: integer
+      type:
+        type: string
+      username:
+        type: string
+    type: object
+  models.ProxyInput:
+    properties:
+      host:
+        type: string
+      name:
+        type: string
+      password:
+        type: string
+      port:
+        type: integer
+      type:
+        type: string
+      username:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: Manage OAuth-connected Gmail and Microsoft mailboxes, proxies, and
+    synced messages.
+  title: DeezMails API
+  version: 0.1.0
+paths:
+  /api/accounts:
+    get:
+      parameters:
+      - description: Filter provider
+        enum:
+        - gmail
+        - microsoft
+        in: query
+        name: provider
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Account'
+            type: array
+      summary: List mailbox accounts
+      tags:
+      - accounts
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Account
+        in: body
+        name: account
+        required: true
+        schema:
+          $ref: '#/definitions/models.AccountInput'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Account'
+      summary: Create mailbox account metadata
+      tags:
+      - accounts
+  /api/accounts/{id}:
+    delete:
+      parameters:
+      - description: Account ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: No Content
+      summary: Delete account and synced messages
+      tags:
+      - accounts
+    get:
+      parameters:
+      - description: Account ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Account'
+      summary: Get account
+      tags:
+      - accounts
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Account ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Account update
+        in: body
+        name: account
+        required: true
+        schema:
+          $ref: '#/definitions/models.AccountUpdateInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Account'
+      summary: Update an account
+      tags:
+      - accounts
+  /api/accounts/{id}/emails:
+    get:
+      parameters:
+      - description: Account ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - default: 1
+        description: Page
+        in: query
+        name: page
+        type: integer
+      - default: 50
+        description: Page size
+        in: query
+        name: pageSize
+        type: integer
+      - description: Search sender, subject, and preview
+        in: query
+        name: q
+        type: string
+      - default: all
+        description: Folder ID or name; defaults to all folders
+        in: query
+        name: folder
+        type: string
+      - description: Sort field
+        enum:
+        - receivedAt
+        - subject
+        - from
+        - createdAt
+        in: query
+        name: sort
+        type: string
+      - description: Sort direction
+        enum:
+        - asc
+        - desc
+        in: query
+        name: direction
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: List synced emails
+      tags:
+      - emails
+  /api/accounts/{id}/emails/{messageID}:
+    get:
+      parameters:
+      - description: Account ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Provider message ID
+        in: path
+        name: messageID
+        required: true
+        type: string
+      - description: Response format
+        enum:
+        - json
+        - raw
+        in: query
+        name: format
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Email'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "429":
+          description: Too Many Requests
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "502":
+          description: Bad Gateway
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "503":
+          description: Service Unavailable
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      summary: Get an email in JSON or raw RFC 822 format
+      tags:
+      - emails
+  /api/accounts/{id}/folders:
+    get:
+      parameters:
+      - description: Account ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Folder'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "429":
+          description: Too Many Requests
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "502":
+          description: Bad Gateway
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "503":
+          description: Service Unavailable
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      summary: List available mailbox folders
+      tags:
+      - accounts
+  /api/accounts/{id}/reconnect:
+    post:
+      parameters:
+      - description: Account ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "202":
+          description: Accepted
+          schema:
+            $ref: '#/definitions/models.JobRun'
+      summary: Reconnect a mailbox
+      tags:
+      - accounts
+  /api/accounts/{id}/sync:
+    post:
+      parameters:
+      - description: Account ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - default: all
+        description: Folder ID or all
+        in: query
+        name: folder
+        type: string
+      produces:
+      - application/json
+      responses:
+        "202":
+          description: Accepted
+          schema:
+            $ref: '#/definitions/models.JobRun'
+      summary: Queue a mailbox sync job
+      tags:
+      - accounts
+  /api/jobs:
+    delete:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: integer
+            type: object
+      summary: Clear completed and failed job history
+      tags:
+      - jobs
+    get:
+      parameters:
+      - description: Filter status
+        in: query
+        name: status
+        type: string
+      - description: Filter account
+        in: query
+        name: accountId
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.JobRun'
+            type: array
+      summary: List durable job runs
+      tags:
+      - jobs
+  /api/jobs/{id}:
+    get:
+      parameters:
+      - description: Job ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.JobRun'
+      summary: Get a durable job run
+      tags:
+      - jobs
+  /api/jobs/{id}/retry:
+    post:
+      parameters:
+      - description: Job ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "202":
+          description: Accepted
+          schema:
+            $ref: '#/definitions/models.JobRun'
+      summary: Retry a failed job
+      tags:
+      - jobs
+  /api/jobs/summary:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.JobSummary'
+            type: array
+      summary: List lightweight job status rows
+      tags:
+      - jobs
+  /api/proxies:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Proxy'
+            type: array
+      summary: List proxies
+      tags:
+      - proxies
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Proxy
+        in: body
+        name: proxy
+        required: true
+        schema:
+          $ref: '#/definitions/models.ProxyInput'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Proxy'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Create a proxy
+      tags:
+      - proxies
+  /api/proxies/{id}:
+    delete:
+      parameters:
+      - description: Proxy ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: No Content
+      summary: Delete a proxy
+      tags:
+      - proxies
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Proxy ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Proxy
+        in: body
+        name: proxy
+        required: true
+        schema:
+          $ref: '#/definitions/models.ProxyInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Proxy'
+      summary: Update a proxy
+      tags:
+      - proxies
+  /oauth/callback:
+    get:
+      parameters:
+      - description: OAuth state
+        in: query
+        name: state
+        required: true
+        type: string
+      - description: Authorization code
+        in: query
+        name: code
+        type: string
+      - description: OAuth error code
+        in: query
+        name: error
+        type: string
+      responses:
+        "200":
+          description: Account connected
+          schema:
+            type: string
+      summary: OAuth provider callback
+      tags:
+      - OAuth
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

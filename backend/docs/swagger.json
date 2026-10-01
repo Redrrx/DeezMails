@@ -1,0 +1,1254 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "Manage OAuth-connected Gmail and Microsoft mailboxes, proxies, and synced messages.",
+        "title": "DeezMails API",
+        "contact": {},
+        "version": "0.1.0"
+    },
+    "host": "localhost:8080",
+    "basePath": "/",
+    "paths": {
+        "/api/accounts": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "accounts"
+                ],
+                "summary": "List mailbox accounts",
+                "parameters": [
+                    {
+                        "enum": [
+                            "gmail",
+                            "microsoft"
+                        ],
+                        "type": "string",
+                        "description": "Filter provider",
+                        "name": "provider",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.Account"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "accounts"
+                ],
+                "summary": "Create mailbox account metadata",
+                "parameters": [
+                    {
+                        "description": "Account",
+                        "name": "account",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.AccountInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/models.Account"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/accounts/{id}": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "accounts"
+                ],
+                "summary": "Get account",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Account ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Account"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "accounts"
+                ],
+                "summary": "Update an account",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Account ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Account update",
+                        "name": "account",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.AccountUpdateInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Account"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "accounts"
+                ],
+                "summary": "Delete account and synced messages",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Account ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            }
+        },
+        "/api/accounts/{id}/emails": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "emails"
+                ],
+                "summary": "List synced emails",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Account ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "Page",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 50,
+                        "description": "Page size",
+                        "name": "pageSize",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Search sender, subject, and preview",
+                        "name": "q",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "default": "all",
+                        "description": "Folder ID or name; defaults to all folders",
+                        "name": "folder",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "receivedAt",
+                            "subject",
+                            "from",
+                            "createdAt"
+                        ],
+                        "type": "string",
+                        "description": "Sort field",
+                        "name": "sort",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "asc",
+                            "desc"
+                        ],
+                        "type": "string",
+                        "description": "Sort direction",
+                        "name": "direction",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/api/accounts/{id}/emails/{messageID}": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "emails"
+                ],
+                "summary": "Get an email in JSON or raw RFC 822 format",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Account ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Provider message ID",
+                        "name": "messageID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "enum": [
+                            "json",
+                            "raw"
+                        ],
+                        "type": "string",
+                        "description": "Response format",
+                        "name": "format",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Email"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    },
+                    "429": {
+                        "description": "Too Many Requests",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    },
+                    "502": {
+                        "description": "Bad Gateway",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    },
+                    "503": {
+                        "description": "Service Unavailable",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/accounts/{id}/folders": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "accounts"
+                ],
+                "summary": "List available mailbox folders",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Account ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.Folder"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    },
+                    "429": {
+                        "description": "Too Many Requests",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    },
+                    "502": {
+                        "description": "Bad Gateway",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    },
+                    "503": {
+                        "description": "Service Unavailable",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/accounts/{id}/reconnect": {
+            "post": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "accounts"
+                ],
+                "summary": "Reconnect a mailbox",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Account ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "202": {
+                        "description": "Accepted",
+                        "schema": {
+                            "$ref": "#/definitions/models.JobRun"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/accounts/{id}/sync": {
+            "post": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "accounts"
+                ],
+                "summary": "Queue a mailbox sync job",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Account ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "default": "all",
+                        "description": "Folder ID or all",
+                        "name": "folder",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "202": {
+                        "description": "Accepted",
+                        "schema": {
+                            "$ref": "#/definitions/models.JobRun"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/jobs": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "jobs"
+                ],
+                "summary": "List durable job runs",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Filter status",
+                        "name": "status",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Filter account",
+                        "name": "accountId",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.JobRun"
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "jobs"
+                ],
+                "summary": "Clear completed and failed job history",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "integer"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/jobs/summary": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "jobs"
+                ],
+                "summary": "List lightweight job status rows",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.JobSummary"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/jobs/{id}": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "jobs"
+                ],
+                "summary": "Get a durable job run",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Job ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.JobRun"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/jobs/{id}/retry": {
+            "post": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "jobs"
+                ],
+                "summary": "Retry a failed job",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Job ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "202": {
+                        "description": "Accepted",
+                        "schema": {
+                            "$ref": "#/definitions/models.JobRun"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/proxies": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "proxies"
+                ],
+                "summary": "List proxies",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.Proxy"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "proxies"
+                ],
+                "summary": "Create a proxy",
+                "parameters": [
+                    {
+                        "description": "Proxy",
+                        "name": "proxy",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.ProxyInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/models.Proxy"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/proxies/{id}": {
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "proxies"
+                ],
+                "summary": "Update a proxy",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Proxy ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Proxy",
+                        "name": "proxy",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.ProxyInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Proxy"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "proxies"
+                ],
+                "summary": "Delete a proxy",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Proxy ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            }
+        },
+        "/oauth/callback": {
+            "get": {
+                "tags": [
+                    "OAuth"
+                ],
+                "summary": "OAuth provider callback",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "OAuth state",
+                        "name": "state",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Authorization code",
+                        "name": "code",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "OAuth error code",
+                        "name": "error",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Account connected",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "models.Account": {
+            "type": "object",
+            "properties": {
+                "clientId": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "enabled": {
+                    "type": "boolean"
+                },
+                "folder": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "incomingHost": {
+                    "type": "string"
+                },
+                "incomingPort": {
+                    "type": "integer"
+                },
+                "lastCheckedAt": {
+                    "type": "string"
+                },
+                "lastError": {
+                    "type": "string"
+                },
+                "lastErrorAction": {
+                    "$ref": "#/definitions/models.MailErrorAction"
+                },
+                "lastErrorCode": {
+                    "$ref": "#/definitions/models.MailErrorCode"
+                },
+                "lastSyncedAt": {
+                    "type": "string"
+                },
+                "nextSyncAt": {
+                    "type": "string"
+                },
+                "provider": {
+                    "type": "string"
+                },
+                "proxy": {
+                    "$ref": "#/definitions/models.Proxy"
+                },
+                "proxyId": {
+                    "type": "integer"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "syncEnabled": {
+                    "type": "boolean"
+                },
+                "tlsMode": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.AccountInput": {
+            "type": "object",
+            "properties": {
+                "clientId": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "folder": {
+                    "type": "string"
+                },
+                "incomingHost": {
+                    "type": "string"
+                },
+                "incomingPort": {
+                    "type": "integer"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "provider": {
+                    "type": "string"
+                },
+                "proxyId": {
+                    "type": "integer"
+                },
+                "refreshToken": {
+                    "type": "string"
+                },
+                "tlsMode": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.AccountUpdateInput": {
+            "type": "object",
+            "properties": {
+                "clientId": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "enabled": {
+                    "type": "boolean"
+                },
+                "folder": {
+                    "type": "string"
+                },
+                "incomingHost": {
+                    "type": "string"
+                },
+                "incomingPort": {
+                    "type": "integer"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "provider": {
+                    "type": "string"
+                },
+                "proxyId": {
+                    "type": "integer"
+                },
+                "refreshToken": {
+                    "type": "string"
+                },
+                "syncEnabled": {
+                    "type": "boolean"
+                },
+                "tlsMode": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.Email": {
+            "type": "object",
+            "properties": {
+                "accountId": {
+                    "type": "integer"
+                },
+                "body": {
+                    "type": "string"
+                },
+                "bodyTruncated": {
+                    "type": "boolean"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "folder": {
+                    "type": "string"
+                },
+                "from": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "isRead": {
+                    "type": "boolean"
+                },
+                "preview": {
+                    "type": "string"
+                },
+                "receivedAt": {
+                    "type": "string"
+                },
+                "remoteId": {
+                    "type": "string"
+                },
+                "subject": {
+                    "type": "string"
+                },
+                "threadId": {
+                    "type": "string"
+                },
+                "to": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "action": {
+                    "$ref": "#/definitions/models.MailErrorAction"
+                },
+                "code": {
+                    "$ref": "#/definitions/models.MailErrorCode"
+                },
+                "error": {
+                    "type": "string"
+                },
+                "retryAfterSeconds": {
+                    "type": "integer"
+                }
+            }
+        },
+        "models.Folder": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.JobRun": {
+            "type": "object",
+            "properties": {
+                "account": {
+                    "$ref": "#/definitions/models.Account"
+                },
+                "accountId": {
+                    "type": "integer"
+                },
+                "attempts": {
+                    "type": "integer"
+                },
+                "created": {
+                    "type": "integer"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "endedAt": {
+                    "type": "string"
+                },
+                "error": {
+                    "type": "string"
+                },
+                "errorAction": {
+                    "$ref": "#/definitions/models.MailErrorAction"
+                },
+                "errorCode": {
+                    "$ref": "#/definitions/models.MailErrorCode"
+                },
+                "fetched": {
+                    "type": "integer"
+                },
+                "folder": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "logs": {
+                    "type": "string"
+                },
+                "nextAttemptAt": {
+                    "type": "string"
+                },
+                "queueId": {
+                    "type": "string"
+                },
+                "startedAt": {
+                    "type": "string"
+                },
+                "status": {
+                    "$ref": "#/definitions/models.JobStatus"
+                },
+                "synced": {
+                    "type": "integer"
+                },
+                "type": {
+                    "$ref": "#/definitions/models.JobType"
+                },
+                "updated": {
+                    "type": "integer"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.JobStatus": {
+            "type": "string",
+            "enum": [
+                "queued",
+                "running",
+                "retrying",
+                "succeeded",
+                "failed"
+            ],
+            "x-enum-varnames": [
+                "JobStatusQueued",
+                "JobStatusRunning",
+                "JobStatusRetrying",
+                "JobStatusSucceeded",
+                "JobStatusFailed"
+            ]
+        },
+        "models.JobSummary": {
+            "type": "object",
+            "properties": {
+                "accountEmail": {
+                    "type": "string"
+                },
+                "accountId": {
+                    "type": "integer"
+                },
+                "attempts": {
+                    "type": "integer"
+                },
+                "created": {
+                    "type": "integer"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "endedAt": {
+                    "type": "string"
+                },
+                "error": {
+                    "type": "string"
+                },
+                "errorAction": {
+                    "$ref": "#/definitions/models.MailErrorAction"
+                },
+                "errorCode": {
+                    "$ref": "#/definitions/models.MailErrorCode"
+                },
+                "fetched": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "nextAttemptAt": {
+                    "type": "string"
+                },
+                "startedAt": {
+                    "type": "string"
+                },
+                "status": {
+                    "$ref": "#/definitions/models.JobStatus"
+                },
+                "synced": {
+                    "type": "integer"
+                },
+                "type": {
+                    "$ref": "#/definitions/models.JobType"
+                },
+                "updated": {
+                    "type": "integer"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.JobType": {
+            "type": "string",
+            "enum": [
+                "sync_account",
+                "verify_connection"
+            ],
+            "x-enum-varnames": [
+                "JobTypeSyncAccount",
+                "JobTypeVerifyConnection"
+            ]
+        },
+        "models.MailErrorAction": {
+            "type": "string",
+            "enum": [
+                "none",
+                "retry",
+                "reconnect",
+                "edit_account",
+                "contact_admin"
+            ],
+            "x-enum-varnames": [
+                "MailErrorActionNone",
+                "MailErrorActionRetry",
+                "MailErrorActionReconnect",
+                "MailErrorActionEditAccount",
+                "MailErrorActionContactAdmin"
+            ]
+        },
+        "models.MailErrorCode": {
+            "type": "string",
+            "enum": [
+                "authentication_failed",
+                "permission_denied",
+                "organization_policy",
+                "quota_exceeded",
+                "rate_limited",
+                "provider_unavailable",
+                "not_found",
+                "invalid_configuration",
+                "tls_failed",
+                "network_failed",
+                "protocol_failed",
+                "response_too_large",
+                "cancelled",
+                "internal_error"
+            ],
+            "x-enum-varnames": [
+                "MailErrorAuthentication",
+                "MailErrorPermission",
+                "MailErrorPolicy",
+                "MailErrorQuota",
+                "MailErrorRateLimit",
+                "MailErrorUnavailable",
+                "MailErrorNotFound",
+                "MailErrorConfiguration",
+                "MailErrorTLS",
+                "MailErrorNetwork",
+                "MailErrorProtocol",
+                "MailErrorResponseTooLarge",
+                "MailErrorCancelled",
+                "MailErrorInternal"
+            ]
+        },
+        "models.Proxy": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "host": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "port": {
+                    "type": "integer"
+                },
+                "type": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.ProxyInput": {
+            "type": "object",
+            "properties": {
+                "host": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "port": {
+                    "type": "integer"
+                },
+                "type": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        }
+    },
+    "securityDefinitions": {
+        "BearerAuth": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
+        }
+    }
+}
