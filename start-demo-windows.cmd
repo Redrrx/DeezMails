@@ -4,6 +4,7 @@ setlocal EnableExtensions
 
 
 cd /d "%~dp0"
+set "PATH=%USERPROFILE%\.bun\bin;%ProgramFiles%\Go\bin;%LOCALAPPDATA%\Microsoft\WinGet\Links;%PATH%"
 
 where bun >nul 2>nul
 if errorlevel 1 (

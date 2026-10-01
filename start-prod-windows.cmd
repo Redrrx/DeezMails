@@ -4,6 +4,8 @@ setlocal EnableExtensions
 rem Build and run DeezMails using environment variables or .env.
 
 cd /d "%~dp0"
+set "PATH=%USERPROFILE%\.bun\bin;%ProgramFiles%\Go\bin;%LOCALAPPDATA%\Microsoft\WinGet\Links;%PATH%"
+if not defined GOTOOLCHAIN set "GOTOOLCHAIN=auto"
 
 where go >nul 2>nul
 if errorlevel 1 (

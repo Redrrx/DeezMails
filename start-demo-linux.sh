@@ -6,6 +6,7 @@ set -Eeuo pipefail
 
 ROOT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 cd "$ROOT_DIR"
+export PATH="${BUN_INSTALL:-$HOME/.bun}/bin:$PATH"
 
 if ! command -v bun >/dev/null 2>&1; then
 	echo "Error: Bun 1.4.2 or newer is required." >&2
