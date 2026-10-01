@@ -10,3 +10,4 @@ backend/deezmails
 deezmails.exe
 .env
 backend/.env
+.zed
