@@ -28,7 +28,10 @@ const docTemplate = `{
                     {
                         "enum": [
                             "gmail",
-                            "microsoft"
+                            "microsoft",
+                            "microsoft_imap",
+                            "imap",
+                            "pop3"
                         ],
                         "type": "string",
                         "description": "Filter provider",
@@ -828,6 +831,9 @@ const docTemplate = `{
                 "proxyId": {
                     "type": "integer"
                 },
+                "redirectUri": {
+                    "type": "string"
+                },
                 "status": {
                     "type": "string"
                 },
@@ -869,6 +875,9 @@ const docTemplate = `{
                 "proxyId": {
                     "type": "integer"
                 },
+                "redirectUri": {
+                    "type": "string"
+                },
                 "refreshToken": {
                     "type": "string"
                 },
@@ -906,6 +915,9 @@ const docTemplate = `{
                 },
                 "proxyId": {
                     "type": "integer"
+                },
+                "redirectUri": {
+                    "type": "string"
                 },
                 "refreshToken": {
                     "type": "string"

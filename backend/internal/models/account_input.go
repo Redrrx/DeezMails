@@ -5,6 +5,7 @@ type AccountInput struct {
 	Password     string `json:"password"`
 	Provider     string `json:"provider"`
 	ClientID     string `json:"clientId"`
+	RedirectURI  string `json:"redirectUri"`
 	RefreshToken string `json:"refreshToken"`
 	IncomingHost string `json:"incomingHost"`
 	IncomingPort int    `json:"incomingPort"`
@@ -18,6 +19,7 @@ type AccountUpdateInput struct {
 	Password     *string `json:"password"`
 	Provider     *string `json:"provider"`
 	ClientID     *string `json:"clientId"`
+	RedirectURI  *string `json:"redirectUri"`
 	RefreshToken *string `json:"refreshToken"`
 	IncomingHost *string `json:"incomingHost"`
 	IncomingPort *int    `json:"incomingPort"`

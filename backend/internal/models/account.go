@@ -3,13 +3,14 @@ package models
 import "time"
 
 const (
-	ProviderGmail     = "gmail"
-	ProviderMicrosoft = "microsoft"
-	ProviderIMAP      = "imap"
-	ProviderPOP3      = "pop3"
-	TLSModeImplicit   = "implicit_tls"
-	TLSModeStartTLS   = "starttls"
-	TLSModeNone       = "none"
+	ProviderGmail         = "gmail"
+	ProviderMicrosoft     = "microsoft"
+	ProviderMicrosoftIMAP = "microsoft_imap"
+	ProviderIMAP          = "imap"
+	ProviderPOP3          = "pop3"
+	TLSModeImplicit       = "implicit_tls"
+	TLSModeStartTLS       = "starttls"
+	TLSModeNone           = "none"
 
 	AccountStatusDisconnected      = "disconnected"
 	AccountStatusConnected         = "connected"
@@ -22,6 +23,7 @@ type Account struct {
 	Email               string          `json:"email" gorm:"uniqueIndex;not null"`
 	Provider            string          `json:"provider" gorm:"not null"`
 	OAuthClientID       string          `json:"clientId" gorm:"not null;default:''"`
+	OAuthRedirectURL    string          `json:"redirectUri" gorm:"not null;default:''"`
 	IncomingHost        string          `json:"incomingHost" gorm:"not null;default:''"`
 	IncomingPort        int             `json:"incomingPort" gorm:"not null;default:0"`
 	TLSMode             string          `json:"tlsMode" gorm:"not null;default:implicit_tls"`

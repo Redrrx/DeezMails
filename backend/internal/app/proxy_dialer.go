@@ -115,7 +115,7 @@ func (d *httpConnectDialer) DialContext(ctx context.Context, network, address st
 		io.CopyN(io.Discard, response.Body, 4096)
 		response.Body.Close()
 		connection.Close()
-		return nil, fmt.Errorf("HTTP proxy refused CONNECT with status %d", response.StatusCode)
+		return nil, proxyConnectFailure(response.StatusCode)
 	}
 	if err := connection.SetDeadline(time.Time{}); err != nil {
 		connection.Close()
@@ -125,6 +125,20 @@ func (d *httpConnectDialer) DialContext(ctx context.Context, network, address st
 		return &bufferedConnection{Conn: connection, reader: reader}, nil
 	}
 	return connection, nil
+}
+
+func proxyConnectFailure(status int) error {
+	failure := &mailFailure{Code: models.MailErrorConfiguration, Action: models.MailErrorActionEditAccount, Message: fmt.Sprintf("Proxy refused the mailbox connection (HTTP %d). Check proxy settings and permitted destination ports.", status), Cause: fmt.Errorf("HTTP proxy refused CONNECT with status %d", status)}
+	switch {
+	case status == http.StatusForbidden:
+		failure.Message = "Proxy blocked the mailbox connection (HTTP 403). Use a proxy that permits the mailbox port (993 for Microsoft IMAP), or select a direct connection."
+	case status == http.StatusProxyAuthRequired:
+		failure.Message = "Proxy authentication failed (HTTP 407). Update the proxy username and password."
+	case status == http.StatusTooManyRequests || status >= 500:
+		failure.Code, failure.Action = models.MailErrorNetwork, models.MailErrorActionRetry
+		failure.Message = fmt.Sprintf("Proxy is temporarily unavailable (HTTP %d). Retry or choose another proxy.", status)
+	}
+	return failure
 }
 
 type bufferedConnection struct {

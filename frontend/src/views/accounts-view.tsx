@@ -53,7 +53,7 @@ export function AccountsView() {
       setShowForm(false);
       setEditingAccount(undefined);
       if (
-        (account.provider === "gmail" || account.provider === "microsoft") &&
+        (account.provider === "gmail" || account.provider === "microsoft" || account.provider === "microsoft_imap") &&
         account.status !== "connected"
       )
         reconnect.mutate(account);

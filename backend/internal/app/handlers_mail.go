@@ -99,7 +99,7 @@ func (a *App) listFolders(c *gin.Context) {
 			internalError(c, "could not load cached folders", err)
 			return
 		}
-		if len(folders) == 0 && (account.Provider == models.ProviderIMAP || account.Provider == models.ProviderPOP3) {
+		if len(folders) == 0 && (usesIMAP(account.Provider) || account.Provider == models.ProviderPOP3) {
 			folders = []models.Folder{{ID: "INBOX", Name: "Inbox"}}
 		}
 		c.JSON(http.StatusOK, folders)
@@ -113,8 +113,8 @@ func (a *App) listFolders(c *gin.Context) {
 		c.JSON(http.StatusOK, []models.Folder{{ID: "INBOX", Name: "Inbox"}})
 		return
 	}
-	if account.Provider == models.ProviderIMAP {
-		folders, err := a.imapFolders(c.Request.Context(), account)
+	if usesIMAP(account.Provider) {
+		folders, err := a.imapFolders(c.Request.Context(), &account)
 		if err != nil {
 			a.respondAccountMailError(c, &account, err)
 			return
@@ -199,7 +199,7 @@ func (a *App) getEmail(c *gin.Context) {
 			return
 		}
 	}
-	if needsRaw && len(raw) == 0 && email.Raw == "" && usesOAuth(account.Provider) {
+	if needsRaw && len(raw) == 0 && email.Raw == "" && usesOAuth(account.Provider) && !usesIMAP(account.Provider) {
 		token, err := a.token(c.Request.Context(), &account)
 		if err != nil {
 			a.respondAccountMailError(c, &account, err)

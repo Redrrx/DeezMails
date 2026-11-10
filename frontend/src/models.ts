@@ -1,4 +1,4 @@
-export type Provider = "gmail" | "microsoft" | "imap" | "pop3";
+export type Provider = "gmail" | "microsoft" | "microsoft_imap" | "imap" | "pop3";
 
 export type MailErrorAction =
   "none" | "retry" | "reconnect" | "edit_account" | "contact_admin";
@@ -27,6 +27,7 @@ export type Account = {
   email: string;
   provider: Provider;
   clientId: string;
+  redirectUri?: string;
   incomingHost: string;
   incomingPort: number;
   tlsMode: string;
@@ -117,6 +118,7 @@ export type AccountInput = {
   password?: string;
   provider: Provider;
   clientId?: string;
+  redirectUri?: string;
   refreshToken?: string;
   incomingHost?: string;
   incomingPort?: number;

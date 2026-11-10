@@ -31,6 +31,11 @@ func (a *App) createAccount(c *gin.Context) {
 	input.Provider = strings.ToLower(strings.TrimSpace(input.Provider))
 	input.ClientID = strings.TrimSpace(input.ClientID)
 	input.RefreshToken = strings.TrimSpace(input.RefreshToken)
+	input.RedirectURI = strings.TrimSpace(input.RedirectURI)
+	if !validAccountRedirect(input.RedirectURI) {
+		badRequest(c, "redirect URI must be an absolute HTTPS URL (HTTP allowed for loopback), without credentials or a fragment")
+		return
+	}
 	input.IncomingHost = validation.NormalizeNetworkHost(strings.TrimSpace(input.IncomingHost))
 	input.TLSMode = strings.ToLower(strings.TrimSpace(input.TLSMode))
 	input.Folder = strings.TrimSpace(input.Folder)
@@ -44,7 +49,7 @@ func (a *App) createAccount(c *gin.Context) {
 		badRequest(c, "invalid account configuration")
 		return
 	}
-	account := models.Account{Email: input.Email, Provider: input.Provider, OAuthClientID: input.ClientID, MailboxPassword: input.Password, RefreshToken: input.RefreshToken, IncomingHost: input.IncomingHost, IncomingPort: input.IncomingPort, TLSMode: input.TLSMode, Folder: input.Folder, ProxyID: input.ProxyID}
+	account := models.Account{Email: input.Email, Provider: input.Provider, OAuthClientID: input.ClientID, OAuthRedirectURL: input.RedirectURI, MailboxPassword: input.Password, RefreshToken: input.RefreshToken, IncomingHost: input.IncomingHost, IncomingPort: input.IncomingPort, TLSMode: input.TLSMode, Folder: input.Folder, ProxyID: input.ProxyID}
 	account.Enabled, account.SyncEnabled = true, true
 	account.Status = models.AccountStatusDisconnected
 	if account.RefreshToken != "" {
@@ -74,7 +79,7 @@ func (a *App) createAccount(c *gin.Context) {
 // @Summary List mailbox accounts
 // @Tags accounts
 // @Produce json
-// @Param provider query string false "Filter provider" Enums(gmail,microsoft)
+// @Param provider query string false "Filter provider" Enums(gmail,microsoft,microsoft_imap,imap,pop3)
 // @Success 200 {array} models.Account
 // @Router /api/accounts [get]
 func (a *App) listAccounts(c *gin.Context) {
@@ -169,6 +174,18 @@ func (a *App) updateAccount(c *gin.Context) {
 			badRequest(c, "invalid folder")
 			return
 		}
+	}
+
+	if in.RedirectURI != nil {
+		redirect := strings.TrimSpace(*in.RedirectURI)
+		if !validAccountRedirect(redirect) {
+			badRequest(c, "redirect URI must be an absolute HTTPS URL (HTTP allowed for loopback), without credentials or a fragment")
+			return
+		}
+		if redirect != account.OAuthRedirectURL {
+			account.OAuthState, account.OAuthCodeVerifier, account.OAuthStateExpiresAt = "", "", nil
+		}
+		account.OAuthRedirectURL = redirect
 	}
 
 	connectionChanged := providerChanged || in.Email != nil || in.ClientID != nil || in.RefreshToken != nil || in.Password != nil || in.IncomingHost != nil || in.IncomingPort != nil || in.TLSMode != nil || in.Folder != nil || in.ProxyID != nil

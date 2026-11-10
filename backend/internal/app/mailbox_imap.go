@@ -16,8 +16,8 @@ import (
 	"github.com/emersion/go-imap/v2/imapclient"
 )
 
-func (a *App) imapMessages(ctx context.Context, account models.Account, selectedFolder string) ([]models.Email, error) {
-	client, err := imapSession(ctx, account)
+func (a *App) imapMessages(ctx context.Context, account *models.Account, selectedFolder string) ([]models.Email, error) {
+	client, err := a.imapSession(ctx, account)
 	if err != nil {
 		return nil, err
 	}
@@ -117,9 +117,19 @@ func (a *App) imapMessages(ctx context.Context, account models.Account, selected
 	return result, nil
 }
 
-func imapSession(ctx context.Context, account models.Account) (*imapclient.Client, error) {
+func (a *App) imapSession(ctx context.Context, account *models.Account) (*imapclient.Client, error) {
+	if account.Provider == models.ProviderMicrosoftIMAP {
+		if _, err := a.token(ctx, account); err != nil {
+			return nil, err
+		}
+	}
+	connectionAccount := *account
+	if account.Provider == models.ProviderMicrosoftIMAP {
+		connectionAccount.IncomingHost, connectionAccount.IncomingPort, connectionAccount.TLSMode = "outlook.office365.com", 993, models.TLSModeImplicit
+	}
+	account = &connectionAccount
 	address := net.JoinHostPort(account.IncomingHost, strconv.Itoa(account.IncomingPort))
-	dialer, err := accountDialer(account)
+	dialer, err := accountDialer(*account)
 	if err != nil {
 		return nil, err
 	}
@@ -157,7 +167,12 @@ func imapSession(ctx context.Context, account models.Account) (*imapclient.Clien
 		}
 		return nil, err
 	}
-	if err := client.Login(account.Email, account.MailboxPassword).Wait(); err != nil {
+	if account.Provider == models.ProviderMicrosoftIMAP {
+		err = client.Authenticate(&imapOAuthClient{email: account.Email, token: account.AccessToken})
+	} else {
+		err = client.Login(account.Email, account.MailboxPassword).Wait()
+	}
+	if err != nil {
 		client.Close()
 		if protocolError, ok := errors.AsType[*imap.Error](err); ok && protocolError.Code == "" {
 			return nil, &mailFailure{Code: models.MailErrorAuthentication, Action: models.MailErrorActionEditAccount, Message: "IMAP rejected the mailbox credentials. Edit the account credentials.", Cause: err}
@@ -178,8 +193,8 @@ func (a *App) imapFolderNames(client *imapclient.Client) ([]string, error) {
 	return folders, command.Close()
 }
 
-func (a *App) imapFolders(ctx context.Context, account models.Account) ([]models.Folder, error) {
-	client, err := imapSession(ctx, account)
+func (a *App) imapFolders(ctx context.Context, account *models.Account) ([]models.Folder, error) {
+	client, err := a.imapSession(ctx, account)
 	if err != nil {
 		return nil, err
 	}

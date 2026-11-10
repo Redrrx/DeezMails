@@ -3,17 +3,33 @@ package app
 import (
 	"fmt"
 	"net/mail"
+	"net/url"
 
 	"deezmails/internal/models"
 	"deezmails/internal/validation"
 )
 
+func validAccountRedirect(value string) bool {
+	if value == "" {
+		return true
+	}
+	if len(value) > 4096 || validation.HasLineBreakOrNUL(value) {
+		return false
+	}
+	u, err := url.Parse(value)
+	return err == nil && u.IsAbs() && u.Hostname() != "" && u.User == nil && u.Fragment == "" && (u.Scheme == "https" || (u.Scheme == "http" && validation.IsLoopbackHost(u.Hostname())))
+}
+
 func validProvider(provider string) bool {
-	return provider == models.ProviderGmail || provider == models.ProviderMicrosoft || provider == models.ProviderIMAP || provider == models.ProviderPOP3
+	return usesOAuth(provider) || provider == models.ProviderIMAP || provider == models.ProviderPOP3
 }
 
 func usesOAuth(provider string) bool {
-	return provider == models.ProviderGmail || provider == models.ProviderMicrosoft
+	return provider == models.ProviderGmail || provider == models.ProviderMicrosoft || provider == models.ProviderMicrosoftIMAP
+}
+
+func usesIMAP(provider string) bool {
+	return provider == models.ProviderIMAP || provider == models.ProviderMicrosoftIMAP
 }
 
 func (a *App) validIncoming(input models.AccountInput) bool {

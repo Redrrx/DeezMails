@@ -8,7 +8,9 @@ import {
   MessageBarBody,
   MessageBarTitle,
   Option,
+  Tooltip,
 } from "@fluentui/react-components";
+import { QuestionCircleRegular } from "@fluentui/react-icons";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import type { Account, AccountInput, Proxy } from "../../models";
@@ -23,8 +25,15 @@ const formSchema = z.object({
     .string()
     .max(64 * 1024, "Password is too long")
     .optional(),
-  provider: z.enum(["gmail", "microsoft", "imap", "pop3"]),
+  provider: z.enum(["gmail", "microsoft", "microsoft_imap", "imap", "pop3"]),
   clientId: z.string().trim().max(4096, "Client ID is too long").optional(),
+  redirectUri: z.string().trim().max(4096, "Redirect URI is too long").refine((value) => {
+    if (!value) return true;
+    try {
+      const url = new URL(value);
+      return !url.username && !url.password && !url.hash && (url.protocol === "https:" || (url.protocol === "http:" && ["localhost", "127.0.0.1", "[::1]"].includes(url.hostname)));
+    } catch { return false; }
+  }, "Use HTTPS, or HTTP for localhost, without credentials or a fragment").optional(),
   refreshToken: z
     .string()
     .max(128 * 1024, "Refresh token is too long")
@@ -39,7 +48,7 @@ type FormValues = z.infer<typeof formSchema>;
 
 const accountSchema = (canKeepPassword: boolean) =>
   formSchema.superRefine((data, context) => {
-    const oauth = data.provider === "gmail" || data.provider === "microsoft";
+    const oauth = data.provider === "gmail" || data.provider === "microsoft" || data.provider === "microsoft_imap";
     if (oauth && !data.clientId)
       context.addIssue({
         code: "custom",
@@ -93,6 +102,7 @@ export function AccountForm({
       email: account?.email ?? "",
       provider: account?.provider ?? "gmail",
       clientId: account?.clientId ?? "",
+      redirectUri: account?.redirectUri ?? "",
       incomingHost: account?.incomingHost ?? "",
       incomingPort: account?.incomingPort ? String(account.incomingPort) : "",
       tlsMode: (account?.tlsMode as FormValues["tlsMode"]) ?? "implicit_tls",
@@ -100,7 +110,7 @@ export function AccountForm({
     },
   });
   const provider = form.watch("provider");
-  const oauth = provider === "gmail" || provider === "microsoft";
+  const oauth = provider === "gmail" || provider === "microsoft" || provider === "microsoft_imap";
 
   return (
     <div
@@ -125,6 +135,7 @@ export function AccountForm({
             password: oauth ? undefined : data.password || undefined,
             clientId: oauth ? data.clientId || undefined : undefined,
             refreshToken: oauth ? data.refreshToken || undefined : undefined,
+            redirectUri: oauth ? data.redirectUri ?? "" : undefined,
             incomingHost: oauth ? undefined : data.incomingHost || undefined,
             incomingPort:
               oauth || !data.incomingPort
@@ -158,7 +169,8 @@ export function AccountForm({
             value={
               {
                 gmail: "Gmail OAuth",
-                microsoft: "Microsoft OAuth",
+                microsoft: "Microsoft Graph (OAuth2)",
+                microsoft_imap: "Microsoft IMAP (OAuth2)",
                 imap: "Custom IMAP",
                 pop3: "Custom POP3",
               }[provider]
@@ -173,7 +185,8 @@ export function AccountForm({
             }
           >
             <Option value="gmail">Gmail OAuth</Option>
-            <Option value="microsoft">Microsoft OAuth</Option>
+            <Option value="microsoft">Microsoft Graph (OAuth2)</Option>
+            <Option value="microsoft_imap">Microsoft IMAP (OAuth2)</Option>
             <Option value="imap">Custom IMAP</Option>
             <Option value="pop3">Custom POP3</Option>
           </Dropdown>
@@ -188,6 +201,29 @@ export function AccountForm({
               }
             >
               <Input autoComplete="off" {...form.register("clientId")} />
+            </Field>
+            <Field
+              label={
+                <>
+                  OAuth redirect URI (optional){" "}
+                  <Tooltip
+                    content="Blank uses the server default. Must match this client's registered callback and route back to DeezMails. Not used for refresh-token authentication."
+                    relationship="description"
+                  >
+                    <Button
+                      type="button"
+                      appearance="transparent"
+                      size="small"
+                      icon={<QuestionCircleRegular />}
+                      aria-label="Help with OAuth redirect URI"
+                    />
+                  </Tooltip>
+                </>
+              }
+              validationMessage={form.formState.errors.redirectUri?.message}
+              validationState={form.formState.errors.redirectUri ? "error" : "none"}
+            >
+              <Input autoComplete="off" placeholder="Use server default" {...form.register("redirectUri")} />
             </Field>
             <Field
               label={

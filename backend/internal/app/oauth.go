@@ -36,7 +36,7 @@ func (a *App) reconnect(c *gin.Context) {
 		c.JSON(http.StatusConflict, gin.H{"error": "account is already connected; sync it instead"})
 		return
 	}
-	if !usesOAuth(account.Provider) {
+	if !usesOAuth(account.Provider) || (account.Provider == models.ProviderMicrosoftIMAP && account.RefreshToken != "") {
 		job, err := a.enqueueJob(c.Request.Context(), models.JobTypeVerifyConnection, account.ID, "")
 		if err != nil {
 			internalError(c, "could not queue connection check", err)
@@ -58,7 +58,7 @@ func (a *App) reconnect(c *gin.Context) {
 		internalError(c, "could not prepare OAuth connection", err)
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"url": a.oauthConfig(account.Provider, account.OAuthClientID).AuthCodeURL(state, oauth2.AccessTypeOffline, oauth2.ApprovalForce, oauth2.S256ChallengeOption(account.OAuthCodeVerifier))})
+	c.JSON(http.StatusOK, gin.H{"url": a.accountOAuthConfig(account).AuthCodeURL(state, oauth2.AccessTypeOffline, oauth2.ApprovalForce, oauth2.S256ChallengeOption(account.OAuthCodeVerifier))})
 }
 
 // oauthCallback godoc
@@ -130,7 +130,7 @@ func (a *App) oauthCallback(c *gin.Context) {
 		return
 	}
 	exchangeContext := context.WithValue(c.Request.Context(), oauth2.HTTPClient, providerClient)
-	token, err := a.oauthConfig(account.Provider, account.OAuthClientID).Exchange(exchangeContext, code, oauth2.VerifierOption(codeVerifier))
+	token, err := a.accountOAuthConfig(account).Exchange(exchangeContext, code, oauth2.VerifierOption(codeVerifier))
 	if err != nil {
 		failure := setAccountFailure(&account, err)
 		if saveErr := a.saveAccount(c.Request.Context(), &account); saveErr != nil {
@@ -195,12 +195,17 @@ func (a *App) token(ctx context.Context, account *models.Account) (*oauth2.Token
 	}
 	ctx = context.WithValue(ctx, oauth2.HTTPClient, httpClient)
 	t := &oauth2.Token{AccessToken: account.AccessToken, RefreshToken: account.RefreshToken, Expiry: account.TokenExpiry}
-	source := a.oauthConfig(account.Provider, account.OAuthClientID).TokenSource(ctx, t)
-	next, err := source.Token()
+	config := a.accountOAuthConfig(*account)
+	var next *oauth2.Token
+	if account.Provider == models.ProviderMicrosoftIMAP {
+		next, err = refreshIMAPToken(ctx, httpClient, config, t)
+	} else {
+		next, err = config.TokenSource(ctx, t).Token()
+	}
 	if err != nil {
 		return nil, normalizeMailError(err)
 	}
-	if next.AccessToken != account.AccessToken || !next.Expiry.Equal(account.TokenExpiry) {
+	if next.AccessToken != account.AccessToken || next.RefreshToken != account.RefreshToken || !next.Expiry.Equal(account.TokenExpiry) {
 		refreshToken := next.RefreshToken
 		if refreshToken == "" {
 			refreshToken = account.RefreshToken
@@ -213,10 +218,22 @@ func (a *App) token(ctx context.Context, account *models.Account) (*oauth2.Token
 	return next, nil
 }
 
+func (a *App) accountOAuthConfig(account models.Account) *oauth2.Config {
+	config := a.oauthConfig(account.Provider, account.OAuthClientID)
+	if account.OAuthRedirectURL != "" {
+		config.RedirectURL = account.OAuthRedirectURL
+	}
+	return config
+}
+
 func (a *App) oauthConfig(provider, clientID string) *oauth2.Config {
 	redirect := a.config.OAuthRedirectURL
 	if provider == models.ProviderGmail {
 		return &oauth2.Config{ClientID: clientID, ClientSecret: a.config.GmailClientSecret, RedirectURL: redirect, Endpoint: google.Endpoint, Scopes: []string{"https://www.googleapis.com/auth/gmail.readonly"}}
 	}
-	return &oauth2.Config{ClientID: clientID, ClientSecret: a.config.MicrosoftClientSecret, RedirectURL: redirect, Endpoint: oauth2.Endpoint{AuthURL: "https://login.microsoftonline.com/common/oauth2/v2.0/authorize", TokenURL: "https://login.microsoftonline.com/common/oauth2/v2.0/token"}, Scopes: []string{"offline_access", "https://graph.microsoft.com/Mail.Read"}}
+	scopes := []string{"offline_access", "https://graph.microsoft.com/Mail.Read"}
+	if provider == models.ProviderMicrosoftIMAP {
+		scopes = []string{"offline_access", "https://outlook.office.com/IMAP.AccessAsUser.All"}
+	}
+	return &oauth2.Config{ClientID: clientID, ClientSecret: a.config.MicrosoftClientSecret, RedirectURL: redirect, Endpoint: oauth2.Endpoint{AuthURL: "https://login.microsoftonline.com/common/oauth2/v2.0/authorize", TokenURL: "https://login.microsoftonline.com/common/oauth2/v2.0/token"}, Scopes: scopes}
 }

@@ -21,14 +21,6 @@ Open [http://localhost:8080](http://localhost:8080) and log in with your access 
 5. **Read and sync mail.** Once connected, choose **Mailbox** to browse messages and folders. Use **Sync all** or **Refresh mailbox** to request a sync.
 6. **Track activity.** Open **Jobs** to inspect connection checks, sync progress, and errors. Account controls let you reconnect, retry a sync, pause syncing, or disable a mailbox.
 
-### Gmail and Microsoft setup
-
-Accounts purchased or obtained through third-party providers may include an OAuth client ID and refresh token, with a callback URL already configured in their OAuth app. Enter the supplied client ID and refresh token when adding the account.
-
-If you need browser authorization or reconnection, DeezMails' callback must match a URL registered in that app. The local default is `http://localhost:8080/oauth/callback`; use `OAUTH_REDIRECT_URL` to match another registered callback. A preconfigured third-party callback may point to their service rather than your DeezMails instance.
-
-If you use your own OAuth app, register your DeezMails callback with Gmail or Microsoft. Set `GMAIL_CLIENT_SECRET` or `MICROSOFT_CLIENT_SECRET` if the app requires a client secret.
-
 ## API
 
 DeezMails includes an HTTP API for accounts, proxies, mail, folders, and sync jobs. Open **API docs** in the app header, or use [local Swagger docs](http://localhost:8080/swagger/index.html). Authenticate API requests with `Authorization: Bearer <DEEZMAILS_ACCESS_TOKEN>`.

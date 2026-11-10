@@ -29,14 +29,14 @@ func (a *App) syncAccount(ctx context.Context, id uint, folder string) (syncResu
 	}
 	var emails []models.Email
 	var err error
-	if account.Provider == models.ProviderIMAP || account.Provider == models.ProviderPOP3 {
+	if usesIMAP(account.Provider) || account.Provider == models.ProviderPOP3 {
 		if folder != folderAll && !strings.EqualFold(folder, "INBOX") {
 			if account.Provider == models.ProviderPOP3 {
 				return result, fmt.Errorf("POP3 exposes only INBOX")
 			}
 		}
-		if account.Provider == models.ProviderIMAP {
-			emails, err = a.imapMessages(ctx, account, folder)
+		if usesIMAP(account.Provider) {
+			emails, err = a.imapMessages(ctx, &account, folder)
 		} else {
 			emails, err = a.pop3Messages(ctx, account)
 		}
@@ -141,8 +141,8 @@ func (a *App) verifyAccount(ctx context.Context, id uint) error {
 		return fmt.Errorf("account is disabled")
 	}
 	var err error
-	if account.Provider == models.ProviderIMAP {
-		_, err = a.imapFolders(ctx, account)
+	if usesIMAP(account.Provider) {
+		_, err = a.imapFolders(ctx, &account)
 	} else if account.Provider == models.ProviderPOP3 {
 		err = pop3Verify(ctx, account)
 	} else {

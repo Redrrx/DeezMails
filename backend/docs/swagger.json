@@ -22,7 +22,10 @@
                     {
                         "enum": [
                             "gmail",
-                            "microsoft"
+                            "microsoft",
+                            "microsoft_imap",
+                            "imap",
+                            "pop3"
                         ],
                         "type": "string",
                         "description": "Filter provider",
@@ -822,6 +825,9 @@
                 "proxyId": {
                     "type": "integer"
                 },
+                "redirectUri": {
+                    "type": "string"
+                },
                 "status": {
                     "type": "string"
                 },
@@ -863,6 +869,9 @@
                 "proxyId": {
                     "type": "integer"
                 },
+                "redirectUri": {
+                    "type": "string"
+                },
                 "refreshToken": {
                     "type": "string"
                 },
@@ -900,6 +909,9 @@
                 },
                 "proxyId": {
                     "type": "integer"
+                },
+                "redirectUri": {
+                    "type": "string"
                 },
                 "refreshToken": {
                     "type": "string"

@@ -355,6 +355,7 @@ export const demoApi = {
       email: data.email,
       provider: data.provider,
       clientId: data.clientId ?? "",
+      redirectUri: data.redirectUri ?? "",
       incomingHost: data.incomingHost ?? "",
       incomingPort: data.incomingPort ?? 0,
       tlsMode: data.tlsMode ?? "implicit_tls",
@@ -377,6 +378,7 @@ export const demoApi = {
     if (data.email !== undefined) account.email = data.email;
     if (data.provider !== undefined) account.provider = data.provider;
     if (data.clientId !== undefined) account.clientId = data.clientId;
+    if (data.redirectUri !== undefined) account.redirectUri = data.redirectUri;
     if (data.incomingHost !== undefined)
       account.incomingHost = data.incomingHost;
     if (data.incomingPort !== undefined)
